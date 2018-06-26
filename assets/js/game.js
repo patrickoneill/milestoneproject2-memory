@@ -1,48 +1,115 @@
-let card = document.getElementsByClassName("card");         //telling where i want to find the card
-let cards = [...card]                                       //creating an array with all the cards
-
-console.log(cards);                                         //checking that it works and that all the cards are there
-
-const deck = document.getElementById("all-cards");          //all the cards that are in the deck       
-console.log(deck);                                          //checking that it works (didn't realise that I get all the info)
-
-let matchCard = document.getElementsByClassName("match");   //catches the matched class 
-console.log(matchCard);                                     
-
-var opened = [];
-
-function shuffle(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
-    
-    while (currentIndex !== 0) {
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
+var cardArray = [{
+        "name": "ten",
+        "img": "assets/images/ten_of_diamonds.png"
+    },
+    {
+        "name": "ace",
+        "img": "assets/images/ace_of_spades.png"
+    },
+    {
+        "name": "jack",
+        "img": "assets/images/jack_of_hearts2.png"
+    },
+    {
+        "name": "king",
+        "img": "assets/images/king_of_hearts2.png"
+    },
+    {
+        "name": "queen",
+        "img": "assets/images/queen_of_clubs2.png"
     }
-    return array;
+];
+
+console.log(cardArray)
+
+var gamePlay = cardArray.concat(cardArray).sort(function() {
+    return 0.5 - Math.random();
+});
+
+
+var first = "";
+var second = "";
+var count = 0;
+var previous = "null";
+var time = 1500;
+
+var game = document.getElementById("letsPlay");
+
+var stage = document.createElement("section");
+
+stage.setAttribute("class", "grid");
+game.appendChild(stage);
+
+gamePlay.forEach(function(item) {
+    var name = item.name,
+        img = item.img;
+
+    var card = document.createElement("div");
+    card.classList.add("card");
+    card.dataset.name = name;
+
+    var front = document.createElement("div");
+    front.classList.add("front");
+    front.style.backgroundImage = "url(assets/images/red_joker.png)";
+
+
+    var back = document.createElement("div");
+    back.classList.add("back");
+    back.style.backgroundImage = "url(" + img + ")";
+
+    stage.appendChild(card);
+    card.appendChild(front);
+    card.appendChild(back);
+});
+
+var match = function match() {
+    var selected = document.querySelectorAll(".selected");
+    selected.forEach(function(card) {
+        card.classList.add("match");
+    });
 };
 
-document.body.onload = start();
 
-function start() {
-    cards = shuffle(cards);
+
+var reset = function reset() {
+    first = "";
+    second = "";
+    previous = "null";
     
-    for (var i = 0; i < cards.length; i++) {
-        deck.innerHTML = "";
-        [].forEach.call(cards, function(item) {
-            deck.appendChild(item);
-        });
-        cards[i].classList.remove("show", "open", "match", "disable");
-    }
-}
 
-var displayCard = function () {
-    this.classList.toggle("open");
-    this.classList.toggle("show");
-    this.classList.toggle("disable");
+    var selected = document.querySelectorAll(".selected");
+    selected.forEach(function(card) {
+        card.classList.remove("selected");
+    });
 };
 
 
-
+stage.addEventListener("click", function (event) {
+    
+    var clicked = event.target;
+    
+    if (clicked.nodeName === "SECTION" || clicked === previous || clicked.parentNode.classList.contains("selected") || clicked.parentNode.classList.contains("match")) {
+        return;
+    }
+    
+    if (count < 2) {
+        count++;
+        if (count === 1) {
+            first = clicked.parentNode.dataset.name;
+            console.log(first);
+            clicked.parentNode.classList.add("selected");
+        } else {
+            second = clicked.parentNode.dataset.name;
+            console.log(second);
+            clicked.parentNode.classList.add("selected");
+        }
+        
+        if ( first && second) {
+            if (first === second) {
+                setTimeout(match, time);
+            }
+            setTimeout(reset, time);
+        }
+        previous = clicked;
+    }
+});
